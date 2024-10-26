@@ -1,12 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom"; // Import Link for navigation
 
 const Search = () => {
-  // State untuk menyimpan hasil pencarian
+  // State untuk menyimpan hasil pencarian dan semua film
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
+  const [allMovies, setAllMovies] = useState([]); // State untuk semua film
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Fungsi untuk mendapatkan semua film dari API
+  const fetchAllMovies = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.get(
+        `https://api.themoviedb.org/3/movie/popular`, // Fetch popular movies
+        {
+          headers: {
+            accept: "application/json",
+            Authorization:
+              "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyNmY3ZTM1Zjk3NGVmN2RlZTFjYjJhN2JjN2Y5YTZiOSIsIm5iZiI6MTcyOTI1MDQ0MS40OTE5MDYsInN1YiI6IjY3MDQ4ODQxMWI5NmI4ZWY0YzY5Yjc1NCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.fodZ_Y9MX4yMGj1hhSbz0N1kB22AGJIik_NVOpDVm-k",
+          },
+        }
+      );
+
+      setAllMovies(response.data.results);
+    } catch (err) {
+      setError("Terjadi kesalahan saat mengambil film.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Fungsi untuk menangani input pencarian
   const handleSearch = async (e) => {
@@ -17,7 +44,7 @@ const Search = () => {
     try {
       // Panggil API pencarian berdasarkan query
       const response = await axios.get(
-        `https:api.themoviedb.org/3/search/movie`,
+        `https://api.themoviedb.org/3/search/movie`,
         {
           params: {
             query: query, // query diambil dari input pengguna
@@ -37,6 +64,11 @@ const Search = () => {
       setLoading(false);
     }
   };
+
+  // Fetch all movies on component mount
+  useEffect(() => {
+    fetchAllMovies();
+  }, []);
 
   return (
     <div className="search-container p-4">
@@ -63,15 +95,17 @@ const Search = () => {
       {/* Tampilkan error jika ada */}
       {error && <p className="text-red-500">{error}</p>}
 
-      {/* Tampilkan hasil pencarian */}
+      {/* Tampilkan hasil pencarian atau semua film */}
       <div className="search-results">
-        {results.length > 0 ? (
+        {loading ? (
+          <p>Loading...</p>
+        ) : results.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {results.map((movie) => (
               <div key={movie.id} className="card bg-base-100 shadow-xl">
                 <figure>
                   <img
-                    src={`https:image.tmdb.org/t/p/w500${movie.poster_path}`}
+                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
                     alt={movie.title}
                     className="w-full h-64 object-cover"
                   />
@@ -80,12 +114,44 @@ const Search = () => {
                   <h3 className="card-title">{movie.title}</h3>
                   <p>{movie.release_date}</p>
                   <p>Rating: {movie.vote_average}</p>
+                  <Link
+                    to={`/detail/${movie.id}`}
+                    className="btn btn-primary mt-2"
+                  >
+                    Details
+                  </Link>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          !loading && <p>Masukkan kata kunci untuk mencari film.</p>
+          !loading &&
+          allMovies.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {allMovies.map((movie) => (
+                <div key={movie.id} className="card bg-base-100 shadow-xl">
+                  <figure>
+                    <img
+                      src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                      alt={movie.title}
+                      className="w-full h-64 object-cover"
+                    />
+                  </figure>
+                  <div className="card-body">
+                    <h3 className="card-title">{movie.title}</h3>
+                    <p>{movie.release_date}</p>
+                    <p>Rating: {movie.vote_average}</p>
+                    <Link
+                      to={`/detail/${movie.id}`}
+                      className="btn btn-primary mt-2"
+                    >
+                      Details
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
         )}
       </div>
     </div>

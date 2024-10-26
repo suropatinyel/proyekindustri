@@ -1,3 +1,4 @@
+// AlldataReducer.js
 import {
   FILTER,
   GENRE,
@@ -27,10 +28,9 @@ const initialState = {
   images: [],
   genres: [],
   detail: [],
-  rating: [],
+  rating: [], // Untuk menampung data rating
 };
 
-// Movie reducer
 const movieReducer = (state = initialState, action) => {
   switch (action.type) {
     case NOWPLAYING:
@@ -102,6 +102,5 @@ const movieReducer = (state = initialState, action) => {
       return state;
   }
 };
-
 
 export default movieReducer;

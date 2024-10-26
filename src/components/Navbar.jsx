@@ -1,6 +1,7 @@
 import { Search } from "lucide-react"; // Pastikan Anda menggunakan "lucide-react"
 import { useContext } from "react";
 import ThemeMode from "../context/ThemeMode";
+import { Link } from "react-router-dom";
 
 export const Navbar = () => {
   const [getTheme, setTheme] = useContext(ThemeMode);
@@ -122,7 +123,7 @@ export const Navbar = () => {
               <a>Logout</a>
             </li>
             <li>
-              <a>Rating</a>
+              <Link to={"/rating"}>Rating</Link>
             </li>
           </ul>
         </div>
